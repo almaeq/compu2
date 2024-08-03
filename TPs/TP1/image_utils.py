@@ -2,6 +2,15 @@ from PIL import Image
 import math
 
 def open_image(ruta):
+    """
+    Abre una imagen desde la ruta especificada y la convierte a formato RGB.
+
+    Args:
+        ruta (str): Ruta del archivo de imagen.
+
+    Returns:
+        Image: Objeto de la imagen en formato RGB.
+    """
     try:
         image = Image.open(ruta).convert('RGB')
         image.show()
@@ -11,6 +20,16 @@ def open_image(ruta):
         return None
 
 def split_image(image, num_parts):
+    """
+    Divide la imagen en un número especificado de partes iguales.
+
+    Args:
+        imagen (Image): Objeto de la imagen a dividir.
+        num_parts (int): Número de partes en las que dividir la imagen.
+
+    Returns:
+        list: Lista de partes de la imagen como objetos Image.
+    """
     width, height = image.size
     # Calcular las filas y columnas
     columns = math.ceil(math.sqrt(num_parts))

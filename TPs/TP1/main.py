@@ -3,6 +3,9 @@ import signal
 from image_processing import *
 
 def main():
+    """
+    Función principal que maneja la ejecución del procesamiento de imágenes.
+    """
     signal.signal(signal.SIGINT, signal_handler)
     # Crear el objeto parser
     parser = argparse.ArgumentParser(description="Abrir y mostrar una imagen, dividirla en partes iguales, y aplicar un filtro a cada parte en paralelo.")
@@ -18,6 +21,8 @@ def main():
 
     image = open_image(args.ruta)
 
+    if image:
+        width, height, parts, shared_array, part_size = prepare_image_and_array(image, args.num_parts)
 
 if __name__ == "__main__":
     main()

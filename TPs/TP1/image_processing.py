@@ -5,6 +5,16 @@ import sys
 from image_utils import *
 
 def apply_filter(image, filter_type):
+    """
+    Aplica un filtro específico a una imagen.
+
+    Args:
+        imagen (Image): Objeto de la imagen a la cual se aplicará el filtro.
+        filter_type (str): Tipo de filtro a aplicar. Puede ser 'contour', 'edge_enhance_more' o 'emboss'.
+
+    Returns:
+        Image: Objeto de la imagen con el filtro aplicado.
+    """
     filters = {
         'contour': ImageFilter.CONTOUR,
         'edge_enhance_more': ImageFilter.EDGE_ENHANCE_MORE,
@@ -13,6 +23,19 @@ def apply_filter(image, filter_type):
     return image.filter(filters[filter_type])
 
 def worker(index, start, end, width_part, height_part, array, pipe, filter_type):
+    """
+    Función de proceso trabajador que aplica un filtro a una parte de la imagen y guarda el resultado en el array compartido.
+
+    Args:
+        index (int): Índice de la parte de la imagen.
+        start (int): Índice de inicio en el array compartido.
+        end (int): Índice de fin en el array compartido.
+        width_part (int): Ancho de la parte de la imagen.
+        height_part (int): Alto de la parte de la imagen.
+        array (multiprocessing.Array): Array compartido para almacenar la imagen.
+        pipe (multiprocessing.Pipe): Pipe para la comunicación entre procesos.
+        filter_type (str): Tipo de filtro a aplicar.
+    """
     try:
         part = Image.frombytes('RGB', (width_part, height_part), bytes(array[start:end]))
         filtered_part = apply_filter(part, filter_type)
@@ -24,5 +47,34 @@ def worker(index, start, end, width_part, height_part, array, pipe, filter_type)
         pipe.close()
 
 def signal_handler(sig, frame):
+    """
+    Manejador de señales para permitir la interrupción controlada del procesamiento.
+
+    Args:
+        sig (int): Número de señal.
+        frame (frame object): Frame actual.
+    """
     print('Interrupción recibida. Finalizando...')
     sys.exit(0)
+
+def prepare_image_and_array(image, num_parts):
+    """
+    Prepara la imagen y el array compartido para el procesamiento paralelo.
+
+    Args:
+        imagen (Image): Objeto de la imagen a procesar.
+        num_parts (int): Número de partes en las que dividir la imagen.
+        
+    Returns:
+        tuple: Tupla que contiene el ancho y alto de la imagen, las partes de la imagen, el array compartido y el tamaño de cada parte.
+    """
+    width, height = image.size
+    parts = split_image(image, num_parts)
+    total_size = width * height * 3
+    part_size = total_size // num_parts
+    shared_array = multiprocessing.Array('B', total_size)
+    for index, part in enumerate(parts):
+        start = index * part_size
+        shared_array[start:start + part_size] = part.tobytes()
+    return width, height, parts, shared_array, part_size
+
