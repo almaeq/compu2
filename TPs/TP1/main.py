@@ -1,6 +1,7 @@
 import argparse
 import signal
 from image_processing import *
+from image_combination import wait_for_results_and_combine
 
 def main():
     """
@@ -24,6 +25,11 @@ def main():
     if image:
         width, height, parts, shared_array, part_size = prepare_image_and_array(image, args.num_parts)
         processes, parent_conns = manage_processes(parts, part_size, shared_array, args.num_parts)
+        
+        combined_image = wait_for_results_and_combine(width, height, parts[0].size[0], parts[0].size[1], args.num_parts, shared_array, parent_conns)
+        
+        combined_image.save('result.png')
+        combined_image.show()
 
 if __name__ == "__main__":
     main()
