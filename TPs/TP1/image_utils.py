@@ -19,6 +19,7 @@ def open_image(ruta):
         print(f"Error al abrir la imagen: {e}")
         return None
 
+
 def split_image(image, num_parts):
     """
     Divide la imagen en un número especificado de partes iguales.

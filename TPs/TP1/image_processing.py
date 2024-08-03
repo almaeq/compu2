@@ -22,6 +22,7 @@ def apply_filter(image, filter_type):
     }
     return image.filter(filters[filter_type])
 
+
 def worker(index, start, end, width_part, height_part, array, pipe, filter_type):
     """
     Función de proceso trabajador que aplica un filtro a una parte de la imagen y guarda el resultado en el array compartido.
@@ -37,14 +38,15 @@ def worker(index, start, end, width_part, height_part, array, pipe, filter_type)
         filter_type (str): Tipo de filtro a aplicar.
     """
     try:
-        part = Image.frombytes('RGB', (width_part, height_part), bytes(array[start:end]))
+        part = Image.frombytes('RGB', (width_part, height_part), bytes(array[start:end])) # Convertir el array compartido a Image
         filtered_part = apply_filter(part, filter_type)
-        array[start:end] = filtered_part.tobytes()
+        array[start:end] = filtered_part.tobytes() # Actualizar el array compartido con el resultado del filtro
         pipe.send(index)
     except Exception as e:
-        pipe.send((index, str(e)))
+        pipe.send((index, str(e))) 
     finally:
         pipe.close()
+
 
 def signal_handler(sig, frame):
     """
@@ -57,6 +59,7 @@ def signal_handler(sig, frame):
     print('Interrupción recibida. Finalizando...')
     sys.exit(0)
 
+
 def prepare_image_and_array(image, num_parts):
     """
     Prepara la imagen y el array compartido para el procesamiento paralelo.
@@ -64,17 +67,46 @@ def prepare_image_and_array(image, num_parts):
     Args:
         imagen (Image): Objeto de la imagen a procesar.
         num_parts (int): Número de partes en las que dividir la imagen.
-        
+
     Returns:
         tuple: Tupla que contiene el ancho y alto de la imagen, las partes de la imagen, el array compartido y el tamaño de cada parte.
     """
     width, height = image.size
     parts = split_image(image, num_parts)
-    total_size = width * height * 3
+    total_size = width * height * 3 # Tamaño total de la imagen en bytes
     part_size = total_size // num_parts
     shared_array = multiprocessing.Array('B', total_size)
     for index, part in enumerate(parts):
         start = index * part_size
         shared_array[start:start + part_size] = part.tobytes()
     return width, height, parts, shared_array, part_size
+
+
+def manage_processes(parts, part_size, shared_array, num_parts):
+    """
+    Crea y gestiona los procesos para aplicar filtros a las partes de la imagen.
+
+    Args:
+        parts (list): Lista de partes de la imagen.
+        part_size (int): Tamaño de cada parte.
+        shared_array (multiprocessing.Array): Array compartido para almacenar la imagen.
+        num_parts (int): Número de partes en las que dividir la imagen.
+
+    Returns:
+        tuple: Tupla que contiene la lista de procesos y la lista de pipes de comunicación.
+    """
+    processes = []
+    parent_conns = []
+    width_part, height_part = parts[0].size
+    filters = ['contour', 'edge_enhance_more', 'emboss']
+    for index in range(num_parts):
+        start = index * part_size
+        end = (index + 1) * part_size
+        parent_conn, child_conn = multiprocessing.Pipe() # Crear un pipe para la comunicación entre procesos
+        parent_conns.append(parent_conn)
+        filter_type = filters[index % len(filters)]
+        p = multiprocessing.Process(target=worker, args=(index, start, end, width_part, height_part, shared_array, child_conn, filter_type)) 
+        processes.append(p) 
+        p.start()
+    return processes, parent_conns
 

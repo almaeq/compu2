@@ -23,6 +23,7 @@ def main():
 
     if image:
         width, height, parts, shared_array, part_size = prepare_image_and_array(image, args.num_parts)
+        processes, parent_conns = manage_processes(parts, part_size, shared_array, args.num_parts)
 
 if __name__ == "__main__":
     main()
