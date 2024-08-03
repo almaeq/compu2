@@ -3,7 +3,7 @@ import signal
 from image_processing import *
 
 def main():
-
+    signal.signal(signal.SIGINT, signal_handler)
     # Crear el objeto parser
     parser = argparse.ArgumentParser(description="Abrir y mostrar una imagen, dividirla en partes iguales, y aplicar un filtro a cada parte en paralelo.")
 
