@@ -22,6 +22,7 @@ $ python3 main.py ruta/a/tu/imagen.jpg --num_parts 4
 
 num_parts es el numero de partes que se desean extraer de la imagen (puede ser 4 o 2)
 
-El programa se ejecutará en la consola y se mostrará la salida en la consola, en formato de imagen (original y con los filtros).
+El programa se ejecutará en la consola y se mostrará la salida en la consola, en formato de imagen (original y con los filtros). 
+Tiene que poner la cantidad de partes a las que quiere poner el filtro en la imagen.
 
 By Alma Quinteros

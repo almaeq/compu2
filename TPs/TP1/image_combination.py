@@ -29,7 +29,6 @@ def wait_for_results_and_combine(width, height, width_part, height_part, num_par
                     completed += 1
             except EOFError:
                 continue
-
     combined_image = combine_images(width, height, width_part, height_part, num_parts, shared_array)
     return combined_image
 
@@ -51,7 +50,6 @@ def combine_images(width, height, width_part, height_part, num_parts, array):
     """
     columns = math.ceil(math.sqrt(num_parts))
     combined_image = Image.new('RGB', (width, height))
-
     for index in range(num_parts):
         row = index // columns
         col = index % columns
@@ -59,5 +57,4 @@ def combine_images(width, height, width_part, height_part, num_parts, array):
         end = (index + 1) * width_part * height_part * 3
         part = Image.frombytes('RGB', (width_part, height_part), bytes(array[start:end]))
         combined_image.paste(part, (col * width_part, row * height_part))
-
     return combined_image
