@@ -1,2 +1,0 @@
-Esta línea va a test.txt
-Error capturado: module 'sys' has no attribute 'Popen'
