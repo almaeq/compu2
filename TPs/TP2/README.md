@@ -8,9 +8,24 @@
 
 ### Instalación
 
+1. Crear un entorno virtual:
+
+```bash
+python3 -m venv env
+source env/bin/activate
+```
+
+2. Instalar las dependencias:
+
 ```bash
 pip install -r requirements.txt
 ```
+
+## Estructura del proyecto
+
+- main.py: Script principal que inicia el servidor
+- servidor_http.py: Script que maneja las solicitudes HTTP
+- servidor_escalado.py: Script que maneja las solicitudes de escalado
 
 ### Ejecución
 1. Abrir una terminal y ejecutar:
@@ -18,7 +33,7 @@ pip install -r requirements.txt
 ```bash
 python3 main.py -i 127.0.0.1 -p 8090 -e 1.5
 ```
-2. Abrir otra terminal y ejecutar:
+2. Abrir otra terminal y ejecutar el siguiente comando para ver la imagen procesada:
 
 ```bash
 curl http://127.0.0.1:8090/imagen.jpg --output salida.jpg
