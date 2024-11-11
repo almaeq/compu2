@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import signal
 from multiprocessing import Process
 from servidor_http import iniciar_servidor_http
 from servidor_escalado import iniciar_servidor_escalado
@@ -18,6 +19,14 @@ async def main(ip, puerto, factor_escala):
     """
     proceso_escalado = Process(target=iniciar_servidor_escalado, args=(8091, factor_escala))
     proceso_escalado.start()
+
+    def handle_sigint(signum, frame):
+        print("\nProceso terminado por el usuario")
+        proceso_escalado.terminate()  # Finaliza el proceso de escalado
+        exit(0)
+
+    # Configurar la señal SIGINT (Ctrl+C)
+    signal.signal(signal.SIGINT, handle_sigint)
 
     await iniciar_servidor_http(ip, puerto)
 

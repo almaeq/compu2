@@ -8,27 +8,26 @@ tareas = {}
 
 async def manejar_solicitud(request):
     """
-    Función que maneja las solicitudes de imágenes de forma asíncrona.
-
-    Args:
-        request (aiohttp.web.Request): La solicitud HTTP recibida.
-
-    Returns:
-        aiohttp.web.Response: Respuesta con un ID de tarea o un mensaje de error.
+    Función que maneja las solicitudes de imágenes de forma asíncrona y devuelve la imagen procesada.
     """
     ruta_imagen = request.match_info.get('ruta')
     if not ruta_imagen or not os.path.exists(ruta_imagen):
         return web.Response(status=404, text="Imagen no encontrada")
 
-    # Generar un ID de tarea único
+    # Generar un ID de tarea único y procesar la imagen.
     id_tarea = str(uuid.uuid4())
     tareas[id_tarea] = 'En progreso'
     print(f"Solicitud recibida para procesar: {ruta_imagen}, ID de tarea: {id_tarea}")
 
-    asyncio.create_task(procesar_imagen(ruta_imagen, id_tarea))
+    await procesar_imagen(ruta_imagen, id_tarea)
 
-    # Responder al cliente con el ID de la tarea
-    return web.json_response({'id_tarea': id_tarea})
+    # Verificar el estado y devolver la imagen procesada si está completada.
+    if tareas[id_tarea] == 'Completada':
+        ruta_procesada = f"escalada_gris_{os.path.basename(ruta_imagen)}"
+        return web.FileResponse(ruta_procesada)
+
+    return web.Response(status=500, text="Error al procesar la imagen")
+
 
 async def procesar_imagen(ruta_imagen, id_tarea):
     """
@@ -77,20 +76,11 @@ async def consultar_estado_tarea(request):
     estado = tareas.get(id_tarea, 'No encontrado')
     return web.json_response({'id_tarea': id_tarea, 'estado': estado})
 
+
 async def iniciar_servidor_http(ip, puerto):
-    """
-    Función que configura y arranca el servidor HTTP.
-
-    Args:
-        ip (str): Dirección IP en la que se escucharán las solicitudes.
-        puerto (int): Puerto en el que se ejecutará el servidor HTTP.
-
-    Returns:
-        None
-    """
     app = web.Application()
-    app.router.add_get('/{ruta}', manejar_solicitud)
-    app.router.add_get('/estado/{id_tarea}', consultar_estado_tarea)
+    app.router.add_get('/{ruta}', manejar_solicitud)  # Devuelve la imagen procesada
+    app.router.add_get('/estado/{id_tarea}', consultar_estado_tarea)  # Consulta el estado
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, ip, puerto)
