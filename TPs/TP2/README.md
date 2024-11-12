@@ -26,6 +26,7 @@ pip install -r requirements.txt
 - main.py: Script principal que inicia el servidor
 - servidor_http.py: Script que maneja las solicitudes HTTP
 - servidor_escalado.py: Script que maneja las solicitudes de escalado
+- cliente.py: Script que envía una imagen a la aplicación
 
 ### Para ver el diplay de ayuda
 ```bash
@@ -47,33 +48,41 @@ python3 main.py -i ::1 -p 8090 -e 1.5
 - `-p`: Puerto de escucha
 - `-e`: Factor de escalado
 
-2. Abrir otra terminal y ejecutar el siguiente comando para ver la imagen procesada:
+2. Abrir otra terminal y ejecutar el cliente para enviar una imagen a la aplicación:
 
-En IPv4:
 ```bash
-curl http://127.0.0.1:8090/imagen.jpg --output salida.jpg
+python3 cliente.py 
 ```
-En IPv6:
+El cliente preguntará por la dirección IP y el puerto del servidor HTTP, así como la ruta de la imagen que se desea procesar.
+
+Para IPv4:
 ```bash
-curl http://[::1]:8090/imagen.jpg --output salida.jpg
+Ingrese la IP del servidor: 127.0.0.1
+Ingrese el puerto del servidor: 8090
+Ingrese la ruta de la imagen a procesar: imagen.jpg
+```
+
+Para IPv6:
+```bash
+Ingrese la IP del servidor: ::1
+Ingrese el puerto del servidor: 8090
+Ingrese la ruta de la imagen a procesar: imagen.jpg
 ```
 
 3. Luego, de haber ejecutado el comando anterior, en la primer terminal abierta va a aparecer el id de la tarea para si se quiere consultar el estado de la tarea.
 
 ## Importante
-Tener en cuenta si es IPv4 o IPv6 a la hora de usar los curl
+Tener en cuenta si es IPv4 o IPv6 a la hora de completar el cliente
 
-### Ejemplo de uso para ver la imagen procesada
-
+### Para ver el estado de una tarea
+En el navegador escribir la siguiente URL y reemplazar el id de tarea con el que se obtuvo:
 ```bash
-curl http://127.0.0.1:8090/imagen.jpg --output salida.jpg
+hhttp://127.0.0.1:8090/estado/<id_tarea>
 ```
 
-### Ejemplo de uso para ver el estado de una tarea
-Reemplazar el id de tarea con el que se obtuvo
-
+#### Ejemplo de uso para ver el estado de una tarea
 ```bash
-curl http://127.0.0.1:8090/estado/34d6916e-49b8-40f5-9940-a2c1a2e0082c
+http://127.0.0.1:8090/estado/34d6916e-49b8-40f5-9940-a2c1a2e0082c
 ```
 
 ```json

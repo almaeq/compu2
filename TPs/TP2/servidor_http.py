@@ -9,6 +9,16 @@ tareas = {}
 async def manejar_solicitud(request):
     """
     Función que maneja las solicitudes de imágenes de forma asíncrona y devuelve la imagen procesada.
+
+    Args:
+        request (aiohttp.web.Request): La solicitud HTTP recibida. Contiene información sobre la ruta de la imagen
+        solicitada en el `match_info` del request.
+
+    Returns:
+        aiohttp.web.Response: 
+            - Si la imagen no existe, devuelve una respuesta con un código de estado 404 y el texto "Imagen no encontrada".
+            - Si el procesamiento de la imagen se completa con éxito, devuelve un `web.FileResponse` que contiene la imagen procesada.
+            - Si ocurre un error durante el procesamiento de la imagen, devuelve una respuesta con un código de estado 500 y el texto "Error al procesar la imagen".
     """
     ruta_imagen = request.match_info.get('ruta')
     if not ruta_imagen or not os.path.exists(ruta_imagen):
@@ -78,6 +88,16 @@ async def consultar_estado_tarea(request):
 
 
 async def iniciar_servidor_http(ip, puerto):
+    """
+    Inicia un servidor HTTP asíncrono en la dirección IP y puerto especificados.
+
+    Args:
+        ip (str): La dirección IP en la que se escucharán las solicitudes entrantes.
+        puerto (int): El puerto en el que el servidor HTTP estará escuchando.
+
+    Returns:
+        None. La función inicia el servidor y permanece en espera de solicitudes indefinidamente.
+    """
     app = web.Application()
     app.router.add_get('/{ruta}', manejar_solicitud)  # Devuelve la imagen procesada
     app.router.add_get('/estado/{id_tarea}', consultar_estado_tarea)  # Consulta el estado
